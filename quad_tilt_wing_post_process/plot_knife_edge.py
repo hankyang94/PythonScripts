@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 
 filePath = "/Users/Hank/solver_output/"
-fileName = "transform_sol_0mps_100mps_snopt_new_py.txt"
+fileName = "traj_opt_snopt_roll_py.txt"
 
 file = open(filePath+fileName, 'r')
 rawData = file.readlines()
@@ -40,28 +40,37 @@ print tData.shape
 print uData.shape
 print xData.shape
 
+plt.rc('text', usetex=True)
+plt.rc('font', family='serif')
+
 # plot states of trajectory optimization
 num_states = xData.shape[0]
-fig1 = plt.figure(1, figsize=(5, 20))
-x_states = ["x[m]", "y[m]", "z[m]", "phi", "theta", "psi",
-            "x_dot[m/s]", "y_dot[m/s]", "z_dot[m/s]",
-            "phi_dot[/s]", "theta_dot[/s]", "psi_dot[/s]"]
+fig1, axarry1 = plt.subplots(num_states, sharex=True, figsize=(5, 12), dpi=300)
+x_states = [r'X[m]', r'Y[m]', r'Z[m]', r'$\phi$', r'$\theta$', r'$\psi$',
+            r'$\dot{X}$[m/s]', r'$\dot{Y}$[m/s]', r'$\dot{Z}$[m/s]',
+            r'$\dot{\phi}$[/s]', r'$\dot{\theta}$[/s]', r'$\dot{\psi}$[/s]']
 for i in range(num_states):
-    fig1.add_subplot(num_states, 1, i+1)
-    plt.plot(tData, xData[i, :])
-    plt.xlabel(r"Time[s]")
-    plt.ylabel(x_states[i])
-
+    axarry1[i].plot(tData, xData[i, :])
+    axarry1[i].set_ylabel(x_states[i])
+axarry1[-1].set_xlabel(r'Time[s]')
+fig1.subplots_adjust(hspace=0)
+plt.setp([a.get_xticklabels() for a in fig1.axes[:-1]], visible=False)
 # plot inputs of trajectory optimization
 num_inputs = uData.shape[0]
-fig2 = plt.figure(2, figsize=(5, 15))
-u_inputs = ["omega1^2", "omega2^2", "omega3^2", "omega4^2",
-            "theta_1", "theta_2", "theta_3", "theta_4"]
+fig2, axarry2 = plt.subplots(num_inputs, sharex=True, figsize=(5, 12), dpi=300)
+u_inputs = [r'$F_1[N]$', r'$F_2[N]$', r'$F_3[N]$', r'$F_4[N]$',
+            r'$\theta_1$', r'$\theta_2$', r'$\theta_3$', r'$\theta_4$']
 for i in range(num_inputs):
-    fig2.add_subplot(num_inputs, 1, i+1)
-    plt.plot(tData, uData[i, :])
-    plt.xlabel(r"Time[s]")
-    plt.ylabel(u_inputs[i])
+    axarry2[i].plot(tData, uData[i, :])
+    axarry2[i].set_ylabel(u_inputs[i])
+axarry2[-1].set_xlabel(r'Time[s]')
+fig2.subplots_adjust(hspace=0)
+plt.setp([a.get_xticklabels() for a in fig2.axes[:-1]], visible=False)
+
+
+fig1.savefig('knife_edge_state.pdf')
+fig2.savefig('knife_edge_control.pdf')
+# fig3.savefig('infinity_xyz.pdf')
 
 plt.show()
 
