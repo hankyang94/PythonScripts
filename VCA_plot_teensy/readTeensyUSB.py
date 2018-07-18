@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 class AnalogData:
   # constr
   def __init__(self, maxLen):
-    self.ax = deque([0]*maxLen)
+    self.ax = deque([0.0]*maxLen)
     self.maxLen = maxLen
 
   # ring buffer
@@ -50,11 +50,13 @@ class AnalogPlot:
 
 # main() function
 def main():
+  voltage_per_bit = 5.0/(2**16)
+  duty_per_bit = 1.0/256
   strPort = '/dev/ttyUSB0'
 
   # plot parameters
   analogData = [AnalogData(200), AnalogData(200)]
-  analogPlot = AnalogPlot(analogData, [[10000, 50000],[-256, 256]])
+  analogPlot = AnalogPlot(analogData, [[0, 5],[-1, 1]])
 
   print 'plotting data...'
 
@@ -67,13 +69,22 @@ def main():
       #~ print "got one line"
       if len(rawRead) != 0:
         #~ print "add data"
-        if int(rawRead) > 1000:   ## point data is from 10k to 50k
-            analogData[0].add([int(rawRead)])
-        else:                    ## duty data in from -256 to 256
-            analogData[1].add([int(rawRead)])
-        count += 1
-        if count % 100 == 0:    ## update plot every 100 data point
-            analogPlot.update(analogData)
+        #~ print rawRead
+        try:
+            data = int(rawRead)
+            if data > 1000:   ## point data is from 10k to 50k
+                voltage = data*voltage_per_bit
+                if voltage > 0 and voltage < 5:
+                    analogData[0].add([voltage])
+            else:
+                duty = data*duty_per_bit                    ## duty data in from -256 to 256
+                if duty > -1 and duty < 1:
+                    analogData[1].add([duty])
+            count += 1
+            if count % 100 == 0:    ## update plot every 100 data point
+                analogPlot.update(analogData)
+        except:
+            print 'I2C error data'
     except KeyboardInterrupt:
       print 'exiting'
       break
