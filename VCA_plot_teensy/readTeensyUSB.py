@@ -83,9 +83,17 @@ class AnalogPlot:
     self.fig, self.axarry = plt.subplots(self.num_channels_VCA, self.num_VCAs, sharex = True)
     self.line = [None] * self.num_channels
     for i in range(self.num_VCAs):
+        if i == 0:
+            self.axarry[0, i].set_title('Motor A')
+        else:
+            self.axarry[0, i].set_title('Motor B')
         for j in range(self.num_channels_VCA):
             self.axarry[j, i].set_ylim(ylimits[i][j][0], ylimits[i][j][1])
             self.line[2*i+j], = self.axarry[j, i].plot(analogData[i].ax)
+            if j == 0:
+                self.axarry[j, i].set_ylabel('Shaft Position [mm]')
+            else:
+                self.axarry[j, i].set_ylabel('Duty Cycle')
     plt.pause(0.00000001)
 
   # update plot
